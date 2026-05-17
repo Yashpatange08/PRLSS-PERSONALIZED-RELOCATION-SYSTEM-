@@ -1,0 +1,47 @@
+.global-footer {
+  width: 100vw;
+  padding: 40px 120px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: black;
+  box-sizing: border-box;
+  font-family: "GoogleSans-Regular", "Inter", sans-serif;
+  color: white;
+  border-top: 1px solid rgba(255, 255, 255, 0.05); /* very subtle separator */
+}
+
+.footer-logo {
+  font-family: "GoogleSans-Bold", sans-serif;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.footer-links {
+  display: flex;
+  gap: 30px;
+}
+
+.footer-links a {
+  color: white;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: opacity 0.2s;
+}
+
+.footer-links a:hover {
+  opacity: 0.7;
+}
+
+.footer-copyright {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 900px) {
+  .global-footer {
+    flex-direction: column;
+    gap: 25px;
+    padding: 40px 20px;
+  }
+}

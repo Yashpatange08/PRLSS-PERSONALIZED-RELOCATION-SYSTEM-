@@ -1,0 +1,73 @@
+version: "3.9"
+
+# Run: docker-compose up --build
+# Django API  → http://localhost:8000
+# React Dev   → cd PrlssInterface && npm run dev → http://localhost:5173
+# Admin panel → http://localhost:8000/admin  (admin / admin123)
+
+services:
+
+  db:
+    image: postgres:16-alpine
+    container_name: prlss_db
+    environment:
+      POSTGRES_DB: prlss_db
+      POSTGRES_USER: prlss_user
+      POSTGRES_PASSWORD: prlss_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prlss_user -d prlss_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: prlss_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  web:
+    build:
+      context: ./prlss-django
+      dockerfile: Dockerfile
+    container_name: prlss_web
+    command: >
+      sh -c "
+        python manage.py migrate --no-input &&
+        python manage.py load_data &&
+        python manage.py collectstatic --no-input &&
+        echo 'from django.contrib.auth import get_user_model; U=get_user_model();
+        U.objects.filter(username=\"admin\").exists() or
+        U.objects.create_superuser(\"admin\",\"admin@prlss.local\",\"admin123\")' |
+        python manage.py shell &&
+        gunicorn apartment_finder.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120
+      "
+    volumes:
+      - ./prlss-django:/app
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_SETTINGS_MODULE: apartment_finder.settings
+      DATABASE_URL: postgres://prlss_user:prlss_pass@db:5432/prlss_db
+      REDIS_URL: redis://redis:6379/0
+      DEBUG: "True"
+      ALLOWED_HOSTS: "localhost,127.0.0.1,0.0.0.0"
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

@@ -1,0 +1,38 @@
+.navbar-container {
+  position: absolute;
+  top: 40px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  z-index: 50;
+}
+
+.navbar {
+  display: flex;
+  gap: 100px;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid white;
+  padding: 15px 120px;
+  border-radius: 50px;
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  font-size: 1.25rem; /* text-xl */
+  font-family: "MyFont", sans-serif;
+  transition: opacity 0.2s;
+}
+
+.nav-link:hover {
+  opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    gap: 30px;
+    padding: 15px 40px;
+  }
+}
