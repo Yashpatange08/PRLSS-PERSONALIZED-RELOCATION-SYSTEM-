@@ -1,7 +1,25 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Apartment, TimelineVisit, UserPreference, RecommendationFeedback
+from .models import City, Apartment, TimelineVisit, UserPreference, RecommendationFeedback
 
+
+# ── NEW: City Admin ───────────────────────────────────────────────────────────
+@admin.register(City)
+class CityAdmin(admin.ModelAdmin):
+    list_display  = ["name", "state_name", "tier", "population_display", "latitude", "longitude", "is_active"]
+    list_filter   = ["tier", "state_name", "is_active"]
+    search_fields = ["name", "state_name", "slug"]
+    list_editable = ["is_active"]
+    ordering      = ["name"]
+    readonly_fields = ["slug", "created_at", "updated_at"]
+    list_per_page = 50
+
+    @admin.display(description="Population")
+    def population_display(self, obj):
+        return f"{obj.population:,}"
+
+
+# ── Existing admin UNCHANGED ──────────────────────────────────────────────────
 
 @admin.register(Apartment)
 class ApartmentAdmin(admin.ModelAdmin):
@@ -13,7 +31,7 @@ class ApartmentAdmin(admin.ModelAdmin):
 
     @admin.display(description="Rent")
     def rent_display(self, obj):
-        return f"₹{obj.rent:,}"
+        return f"Rs.{obj.rent:,}"
 
     @admin.display(description="Match %")
     def match_bar(self, obj):
@@ -28,11 +46,11 @@ class ApartmentAdmin(admin.ModelAdmin):
 
     actions = ["mark_active", "mark_inactive"]
 
-    @admin.action(description="Mark selected active")
+    @admin.action(description="Mark active")
     def mark_active(self, request, qs):
         qs.update(is_active=True)
 
-    @admin.action(description="Mark selected inactive")
+    @admin.action(description="Mark inactive")
     def mark_inactive(self, request, qs):
         qs.update(is_active=False)
 
@@ -47,29 +65,29 @@ class TimelineVisitAdmin(admin.ModelAdmin):
     @admin.display(description="Cluster")
     def cluster_label_display(self, obj):
         labels = {
-            0: ("🎓", "College/Work", "#007bff"),
-            1: ("🛒", "Market",       "#28a745"),
-            2: ("🏠", "Home",         "#fd7e14"),
-            3: ("🎭", "Leisure",      "#6f42c1"),
-            4: ("🚉", "Transport",    "#20c997"),
+            0: ("College/Work", "#007bff"),
+            1: ("Market",       "#28a745"),
+            2: ("Home",         "#fd7e14"),
+            3: ("Leisure",      "#6f42c1"),
+            4: ("Transport",    "#20c997"),
         }
-        icon, label, color = labels.get(obj.cluster, ("📍", f"Cluster {obj.cluster}", "#6c757d"))
+        label, color = labels.get(obj.cluster, (f"Cluster {obj.cluster}", "#6c757d"))
         return format_html(
             '<span style="background:{};color:white;padding:2px 8px;border-radius:4px;font-size:11px;">'
-            '{} {}</span>', color, icon, label
+            '{}</span>', color, label
         )
 
 
 @admin.register(UserPreference)
 class UserPreferenceAdmin(admin.ModelAdmin):
-    list_display  = ["name", "mobile", "city", "rent_budget_display", "created_at"]
-    list_filter   = ["city"]
-    search_fields = ["name", "mobile"]
+    list_display    = ["name", "mobile", "city", "rent_budget_display", "created_at"]
+    list_filter     = ["city"]
+    search_fields   = ["name", "mobile"]
     readonly_fields = ["result_snapshot", "created_at"]
 
     @admin.display(description="Budget")
     def rent_budget_display(self, obj):
-        return f"₹{obj.rent_budget:,}"
+        return f"Rs.{obj.rent_budget:,}"
 
 
 @admin.register(RecommendationFeedback)

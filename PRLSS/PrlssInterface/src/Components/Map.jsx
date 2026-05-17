@@ -19,6 +19,7 @@ function Map() {
   const markers   = useRef([]);
 
   const [apartments, setApartments]   = useState([]);
+  const [timeline, setTimeline]       = useState([]);
   const [selected, setSelected]       = useState(null);
   const [loading, setLoading]         = useState(true);
   const [error, setError]             = useState("");
@@ -28,16 +29,44 @@ function Map() {
     const city   = user.city || "nashik";
     const budget = user.budget || 25000;
 
-    fetch(`http://127.0.0.1:8000/api/apartments/?city=${city}&max_rent=${budget}`)
+    const payload = {
+      name: user.name || "User",
+      city: city,
+      rent_budget: parseInt(budget, 10),
+      college_lat: user.college_lat || null,
+      college_lon: user.college_lon || null,
+    };
+
+    fetch("http://127.0.0.1:8000/api/recommend/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload)
+    })
       .then((r) => r.json())
       .then((data) => {
-        setApartments(Array.isArray(data) ? data : []);
+        if (!data.error && data.recommendations) {
+          setApartments(data.recommendations);
+        } else {
+          setApartments([]);
+          setError(data.message || "No recommendations found.");
+        }
         setLoading(false);
       })
-      .catch(() => {
-        setError("Could not load apartments. Make sure the Django server is running.");
+      .catch((err) => {
+        console.error("Recommend API error", err);
+        setError("Could not load recommendations. Make sure the Django server is running.");
         setLoading(false);
       });
+
+    fetch("http://127.0.0.1:8000/api/timeline/")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) setTimeline(data);
+        else if (data.results) setTimeline(data.results);
+      })
+      .catch((e) => console.error("Failed to load timeline", e));
   }, [user.city, user.budget]);
 
   // ── Load Google Maps + place pins ────────────────────────────────────────
@@ -45,55 +74,89 @@ function Map() {
     if (!mapRef.current) return;
 
     const city   = user.city || "nashik";
-    const center = CITY_CENTERS[city] || CITY_CENTERS.nashik;
+    let center = CITY_CENTERS[city] || CITY_CENTERS.nashik;
 
-    const loadMap = () => {
-      // Init map
-      googleMap.current = new window.google.maps.Map(mapRef.current, {
-        center,
-        zoom: center.zoom,
-        mapTypeId: "roadmap",
-        styles: DARK_MAP_STYLES,
-        disableDefaultUI: false,
-        zoomControl: true,
-        streetViewControl: false,
-        mapTypeControl: false,
-        fullscreenControl: true,
-      });
+    const initGoogleMaps = () => {
+      const loadMap = () => {
+        // Init map
+        googleMap.current = new window.google.maps.Map(mapRef.current, {
+          center,
+          zoom: center.zoom || 13,
+          mapTypeId: "roadmap",
+          styles: DARK_MAP_STYLES,
+          disableDefaultUI: false,
+          zoomControl: true,
+          streetViewControl: false,
+          mapTypeControl: false,
+          fullscreenControl: true,
+        });
 
-      // Place pins for each apartment
-      pinApartments(apartments);
+        // Place pins for each apartment & timeline
+        pinApartments(apartments, timeline);
+      };
+
+      if (window.google && window.google.maps) {
+        loadMap();
+      } else {
+        // Load Maps script dynamically
+        let script = document.getElementById("google-maps-script");
+        if (!script) {
+          script = document.createElement("script");
+          script.id  = "google-maps-script";
+          script.src = `https://maps.googleapis.com/maps/api/js?key=${MAPS_API_KEY}&libraries=places`;
+          script.async = true;
+          document.head.appendChild(script);
+        }
+        script.addEventListener('load', loadMap);
+        script.addEventListener('error', () => setError("Google Maps failed to load. Check your API key."));
+      }
     };
 
-    if (window.google && window.google.maps) {
-      loadMap();
-    } else {
-      // Load Maps script dynamically
-      if (document.getElementById("google-maps-script")) return;
-      const script = document.createElement("script");
-      script.id  = "google-maps-script";
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${MAPS_API_KEY}&libraries=places`;
-      script.async = true;
-      script.onload = loadMap;
-      script.onerror = () => setError("Google Maps failed to load. Check your API key.");
-      document.head.appendChild(script);
-    }
+    fetch(`http://127.0.0.1:8000/api/cities/${city}/`)
+      .then((r) => r.json())
+      .then((res) => {
+        if (!res.error && res.data) {
+          center = { lat: res.data.latitude, lng: res.data.longitude, zoom: res.data.tier === "metro" ? 12 : 13 };
+        }
+        initGoogleMaps();
+      })
+      .catch(() => {
+        initGoogleMaps();
+      });
   }, [user.city]);
 
   // ── Update pins when apartments data arrives ──────────────────────────────
   useEffect(() => {
-    if (googleMap.current && apartments.length > 0) {
-      pinApartments(apartments);
+    if (googleMap.current) {
+      pinApartments(apartments, timeline);
     }
-  }, [apartments]);
+  }, [apartments, timeline]);
 
   // ── Place marker pins on the map ──────────────────────────────────────────
-  const pinApartments = (apts) => {
+  const pinApartments = (apts, times = []) => {
     if (!googleMap.current || !window.google) return;
 
     // Clear old markers
     markers.current.forEach((m) => m.setMap(null));
     markers.current = [];
+
+    // Place timeline dots
+    times.forEach((visit) => {
+      const marker = new window.google.maps.Marker({
+        position: { lat: parseFloat(visit.lat), lng: parseFloat(visit.lon) },
+        map: googleMap.current,
+        title: visit.place_name || "Visited Location",
+        icon: {
+          path: window.google.maps.SymbolPath.CIRCLE,
+          scale: 5,
+          fillColor: "#3b82f6",
+          fillOpacity: 0.7,
+          strokeColor: "#ffffff",
+          strokeWeight: 1,
+        },
+      });
+      markers.current.push(marker);
+    });
 
     apts.forEach((apt, i) => {
       const marker = new window.google.maps.Marker({

@@ -2,8 +2,7 @@ import logging
 
 from django.conf import settings
 from django.core.cache import cache
-from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.http import HttpResponse
 from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -12,9 +11,10 @@ from rest_framework.views import APIView
 
 from .google_maps import geocode_area, get_autocomplete_suggestions, get_place_latlon
 from .ml_engine import get_recommendations
-from .models import Apartment, RecommendationFeedback, TimelineVisit, UserPreference
+from .models import Apartment, City, RecommendationFeedback, TimelineVisit, UserPreference
 from .serializers import (
     ApartmentSerializer,
+    CitySerializer,
     FeedbackSerializer,
     GeocodeRequestSerializer,
     RecommendRequestSerializer,
@@ -24,11 +24,49 @@ from .serializers import (
 logger = logging.getLogger(__name__)
 
 
+# ── GET /api/cities/ — ALL Indian cities from DB ──────────────────────────────
+class CityListView(generics.ListAPIView):
+    """
+    Returns all active Indian cities from the database.
+    React Home.jsx uses this to populate the city dropdown.
+    Supports search: /api/cities/?search=pune
+    Supports state filter: /api/cities/?state=Maharashtra
+    Supports tier filter: /api/cities/?tier=metro
+    """
+    serializer_class = CitySerializer
+
+    def get_queryset(self):
+        qs     = City.objects.filter(is_active=True)
+        search = self.request.query_params.get("search", "").strip()
+        state  = self.request.query_params.get("state", "").strip()
+        tier   = self.request.query_params.get("tier", "").strip()
+
+        if search:
+            qs = qs.filter(name__icontains=search)
+        if state:
+            qs = qs.filter(state_name__icontains=state)
+        if tier:
+            qs = qs.filter(tier=tier)
+
+        return qs.order_by("name")[:200]  # cap at 200 for performance
+
+
+# ── GET /api/cities/<slug>/ — Single city detail ──────────────────────────────
+@api_view(["GET"])
+def city_detail(request, slug):
+    """Returns one city by slug e.g. /api/cities/pune/"""
+    try:
+        city = City.objects.get(slug=slug, is_active=True)
+    except City.DoesNotExist:
+        return Response({"error": True, "message": f"City '{slug}' not found."}, status=404)
+    return Response({"error": False, "data": CitySerializer(city).data})
+
+
 # ── POST /api/recommend/ ──────────────────────────────────────────────────────
 class RecommendView(APIView):
     throttle_classes = [AnonRateThrottle]
 
-    def post(self, request: HttpRequest) -> Response:
+    def post(self, request):
         serializer = RecommendRequestSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(
@@ -37,12 +75,12 @@ class RecommendView(APIView):
             )
 
         data = serializer.validated_data
-        city = data["city"]
+        city = data["city"]  # city slug or name string
 
         # Resolve location
-        area_name = data.get("area_name", "").strip()
-        lat = data.get("college_lat")
-        lon = data.get("college_lon")
+        area_name        = data.get("area_name", "").strip()
+        lat              = data.get("college_lat")
+        lon              = data.get("college_lon")
         resolved_address = ""
         geocode_warning  = ""
 
@@ -72,14 +110,20 @@ class RecommendView(APIView):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
 
-        # Cache
+        if lat is None or lon is None:
+            try:
+                city_obj = City.objects.get(slug=city)
+                lat = float(city_obj.latitude)
+                lon = float(city_obj.longitude)
+            except City.DoesNotExist:
+                lat, lon = 0.0, 0.0
+
         cache_key = f"recommend:{city}:{lat:.4f}:{lon:.4f}:{data['rent_budget']}"
-        cached = cache.get(cache_key)
+        cached    = cache.get(cache_key)
         if cached:
             cached["user_name"] = data["name"]
             return Response(cached)
 
-        # ML
         try:
             recs = get_recommendations(
                 college_lat=lat,
@@ -105,26 +149,33 @@ class RecommendView(APIView):
             result_snapshot=recs,
         )
 
-        top = recs[0] if recs else None
+        # Get city display name from DB (fallback to slug title)
+        try:
+            city_obj      = City.objects.get(slug=city)
+            city_display  = str(city_obj)
+        except City.DoesNotExist:
+            city_display  = city.title()
+
+        top     = recs[0] if recs else None
         payload = {
-            "error":            False,
-            "user_name":        data["name"],
-            "area_name":        area_name,
-            "resolved_address": resolved_address,
-            "searched_lat":     lat,
-            "searched_lon":     lon,
-            "city":             city,
-            "city_display":     settings.CITY_CONFIG.get(city, {}).get("name", city.title()),
-            "rent_budget":      data["rent_budget"],
-            "total_found":      len(recs),
-            "top_apartment":    top["name"] if top else "None",
+            "error":             False,
+            "user_name":         data["name"],
+            "area_name":         area_name,
+            "resolved_address":  resolved_address,
+            "searched_lat":      lat,
+            "searched_lon":      lon,
+            "city":              city,
+            "city_display":      city_display,
+            "rent_budget":       data["rent_budget"],
+            "total_found":       len(recs),
+            "top_apartment":     top["name"] if top else "None",
             "top_match_percent": top["match_percent"] if top else 0,
-            "recommendations":  recs,
-            "preference_id":    pref.pk,
-            "warning":          geocode_warning,
+            "recommendations":   recs,
+            "preference_id":     pref.pk,
+            "warning":           geocode_warning,
             "message": (
                 f"{data['name']}, top apartment: {top['name']} ({top['match_percent']}% match!)"
-                if top else "No apartments found."
+                if top else "No apartments found for your criteria."
             ),
         }
 
@@ -142,7 +193,10 @@ def geocode_view(request):
     serializer = GeocodeRequestSerializer(data=request.query_params)
     if not serializer.is_valid():
         return Response({"error": True, "detail": serializer.errors}, status=400)
-    result = geocode_area(serializer.validated_data["area"], serializer.validated_data["city"])
+    result = geocode_area(
+        serializer.validated_data["area"],
+        serializer.validated_data["city"],
+    )
     if not result:
         return Response({"error": True, "message": "Could not geocode area."}, status=404)
     return Response({"error": False, "data": result})
@@ -155,8 +209,7 @@ def autocomplete_view(request):
     city  = request.query_params.get("city", "nashik")
     if not query or len(query) < 2:
         return Response({"error": False, "data": []})
-    suggestions = get_autocomplete_suggestions(query, city)
-    return Response({"error": False, "data": suggestions})
+    return Response({"error": False, "data": get_autocomplete_suggestions(query, city)})
 
 
 # ── GET /api/apartments/ ──────────────────────────────────────────────────────
@@ -196,14 +249,10 @@ class FeedbackCreateView(generics.CreateAPIView):
         if not serializer.is_valid():
             return Response({"error": True, "detail": serializer.errors}, status=400)
         self.perform_create(serializer)
-        return Response({"error": False, "message": "Feedback saved!", "data": serializer.data}, status=201)
-
-
-# ── GET /api/cities/ ──────────────────────────────────────────────────────────
-@api_view(["GET"])
-def city_list(request):
-    cities = [{"slug": slug, **cfg} for slug, cfg in settings.CITY_CONFIG.items()]
-    return Response({"error": False, "data": cities})
+        return Response(
+            {"error": False, "message": "Feedback saved!", "data": serializer.data},
+            status=201,
+        )
 
 
 # ── GET /api/stats/ ───────────────────────────────────────────────────────────
@@ -217,6 +266,7 @@ def stats_view(request):
         "total_searches":        UserPreference.objects.count(),
         "total_timeline_visits": TimelineVisit.objects.count(),
         "total_feedbacks":       RecommendationFeedback.objects.count(),
+        "total_cities":          City.objects.filter(is_active=True).count(),
         "google_maps_enabled":   bool(getattr(settings, "GOOGLE_MAPS_API_KEY", "")),
     }
     try:
@@ -228,13 +278,13 @@ def stats_view(request):
 
 # ── Error Handlers ────────────────────────────────────────────────────────────
 def error_400(request, exception=None):
-    return HttpResponse('{"error": true, "message": "Bad Request"}',
+    return HttpResponse('{"error":true,"message":"Bad Request"}',
                         content_type="application/json", status=400)
 
 def error_404(request, exception=None):
-    return HttpResponse('{"error": true, "message": "Not Found"}',
+    return HttpResponse('{"error":true,"message":"Not Found"}',
                         content_type="application/json", status=404)
 
 def error_500(request):
-    return HttpResponse('{"error": true, "message": "Server Error"}',
+    return HttpResponse('{"error":true,"message":"Server Error"}',
                         content_type="application/json", status=500)

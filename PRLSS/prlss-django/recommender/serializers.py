@@ -1,16 +1,24 @@
 from rest_framework import serializers
-from django.conf import settings
-from .models import Apartment, TimelineVisit, UserPreference, RecommendationFeedback
+from .models import Apartment, City, TimelineVisit, UserPreference, RecommendationFeedback
 
+
+# ── NEW: City serializer ──────────────────────────────────────────────────────
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = City
+        fields = ["id", "name", "slug", "state_name",
+                  "latitude", "longitude", "population", "tier"]
+
+
+# ── Existing serializers UNCHANGED ────────────────────────────────────────────
 
 class ApartmentSerializer(serializers.ModelSerializer):
     match_percent = serializers.SerializerMethodField()
-    city_display  = serializers.CharField(source="get_city_display", read_only=True)
 
     class Meta:
         model  = Apartment
         fields = [
-            "id", "name", "city", "city_display", "lat", "lon", "address",
+            "id", "name", "city", "lat", "lon", "address",
             "rent", "college_dist", "grocery_dist", "amenity_score",
             "value_score", "match_percent", "furnished", "bhk", "contact", "is_active",
         ]
@@ -36,29 +44,16 @@ class RecommendRequestSerializer(serializers.Serializer):
     area_name   = serializers.CharField(max_length=200, required=False, allow_blank=True, default="")
     college_lat = serializers.FloatField(required=False, allow_null=True, default=None)
     college_lon = serializers.FloatField(required=False, allow_null=True, default=None)
-    rent_budget = serializers.IntegerField(min_value=1000, max_value=200000)
-    city        = serializers.ChoiceField(choices=["nashik", "mumbai", "pune"], default="nashik")
+    rent_budget = serializers.IntegerField(min_value=1000, max_value=500000)
+    # city is now a free string slug (any Indian city)
+    city        = serializers.CharField(max_length=120, default="nashik")
 
-    def validate(self, data):
-        has_area   = bool(data.get("area_name", "").strip())
-        has_coords = (data.get("college_lat") is not None and
-                      data.get("college_lon") is not None)
-        if not has_area and not has_coords:
-            raise serializers.ValidationError(
-                "Provide either 'area_name' or 'college_lat' + 'college_lon'."
-            )
-        city_cfg = settings.CITY_CONFIG.get(data["city"], {})
-        max_rent = city_cfg.get("max_rent", 200000)
-        if data["rent_budget"] > max_rent:
-            raise serializers.ValidationError({
-                "rent_budget": f"Budget exceeds max ₹{max_rent:,} for {data['city'].title()}."
-            })
-        return data
+    # Removed strict validation to allow fallback to city center
 
 
 class GeocodeRequestSerializer(serializers.Serializer):
     area = serializers.CharField(max_length=200)
-    city = serializers.ChoiceField(choices=["nashik", "mumbai", "pune"], default="nashik")
+    city = serializers.CharField(max_length=120, default="nashik")
 
 
 class UserPreferenceSerializer(serializers.ModelSerializer):

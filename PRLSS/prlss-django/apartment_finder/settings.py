@@ -76,14 +76,11 @@ else:
         }
     }
 
-# ── Cache / Redis ─────────────────────────────────────────────────────────────
-REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+# ── Cache ─────────────────────────────────────────────────────────────
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": REDIS_URL,
-        "OPTIONS": {"socket_connect_timeout": 5, "socket_timeout": 5},
-        "TIMEOUT": 300,
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "prlss-cache",
     }
 }
 
@@ -118,7 +115,8 @@ CORS_ALLOW_CREDENTIALS = True
 # ── Static / Media ────────────────────────────────────────────────────────────
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [BASE_DIR / "static"]
+_STATIC_DIR = BASE_DIR / "static"
+STATICFILES_DIRS = [_STATIC_DIR] if _STATIC_DIR.exists() else []
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -139,8 +137,8 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # ── Google Maps ───────────────────────────────────────────────────────────────
-GOOGLE_MAPS_API_KEY  = os.environ.get("AIzaSyBaJ7dwqIKrNMkGU0rzAmz5773PQeyUXcE", "")
-GOOGLE_PLACES_API_KEY = "AIzaSyBaJ7dwqIKrNMkGU0rzAmz5773PQeyUXcE"
+GOOGLE_MAPS_API_KEY  = os.environ.get("GOOGLE_MAPS_API_KEY", "AIzaSyC9YS3Kn3RwLkg6BzKyFFABRNmE4uVT3W0")
+GOOGLE_PLACES_API_KEY = GOOGLE_MAPS_API_KEY
 GEOCODING_REGION     = "IN"
 GEOCODING_LANGUAGE   = "en"
 
@@ -155,59 +153,16 @@ ML_MODEL_PATH       = BASE_DIR / "data" / "apartment_model.pkl"
 TIMELINE_CSV_PATH   = BASE_DIR / "data" / "extracted_timeline.csv"
 APARTMENTS_CSV_PATH = BASE_DIR / "data" / "ml_apartments.csv"
 
-# ── Multi-city config ─────────────────────────────────────────────────────────
-CITY_CONFIG = {
-    "nashik": {
-        "name": "Nashik",
-        "center_lat": 19.9975,
-        "center_lon": 73.7898,
-        "max_rent": 25000,
-        "currency": "₹",
-        "emoji": "🏙️",
-        "popular_areas": [
-            "College Road, Nashik",
-            "CBS Road, Nashik",
-            "Gangapur Road, Nashik",
-            "CIDCO, Nashik",
-            "Panchavati, Nashik",
-        ],
-    },
-    "mumbai": {
-        "name": "Mumbai",
-        "center_lat": 19.0760,
-        "center_lon": 72.8777,
-        "max_rent": 80000,
-        "currency": "₹",
-        "emoji": "🌆",
-        "popular_areas": [
-            "Andheri West, Mumbai",
-            "Bandra, Mumbai",
-            "Powai, Mumbai",
-            "Thane, Mumbai",
-            "Borivali, Mumbai",
-        ],
-    },
-    "pune": {
-        "name": "Pune",
-        "center_lat": 18.5204,
-        "center_lon": 73.8567,
-        "max_rent": 50000,
-        "currency": "₹",
-        "emoji": "🏘️",
-        "popular_areas": [
-            "Hadapsar, Pune",
-            "Hinjewadi, Pune",
-            "Kothrud, Pune",
-            "Viman Nagar, Pune",
-            "Wakad, Pune",
-            "Baner, Pune",
-        ],
-    },
-}
-
+# ── City config — cities are now stored in the City DB table ─────────────────
+# Loaded via: python manage.py import_cities
+# No longer hardcoded. Supports all 157+ Indian cities.
+# DEFAULT_CITY is used as fallback for geocoding when no city is selected.
 DEFAULT_CITY        = "nashik"
 SEARCH_RADIUS_KM    = 5.0
 MAX_RECOMMENDATIONS = 5
+
+# Default max rent used when city not found in DB
+DEFAULT_MAX_RENT = 50000
 
 # ── Logging ───────────────────────────────────────────────────────────────────
 LOGGING = {

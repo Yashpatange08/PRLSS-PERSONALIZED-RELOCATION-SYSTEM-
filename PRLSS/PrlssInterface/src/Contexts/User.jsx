@@ -8,6 +8,8 @@ export function UserProvider({ children }) {
     name: "",
     budget: "",
     city: "",
+    college_lat: null,
+    college_lon: null,
   });
 
   const updateUser = (fields) => {

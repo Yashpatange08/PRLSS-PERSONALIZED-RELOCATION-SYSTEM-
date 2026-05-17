@@ -1,0 +1,158 @@
+city_name,state_name,latitude,longitude,population,tier
+Mumbai,Maharashtra,19.076,72.8777,12442373,metro
+Delhi,Delhi,28.7041,77.1025,11034555,metro
+Bengaluru,Karnataka,12.9716,77.5946,8443675,metro
+Hyderabad,Telangana,17.385,78.4867,6809970,metro
+Ahmedabad,Gujarat,23.0225,72.5714,5577940,metro
+Chennai,Tamil Nadu,13.0827,80.2707,7088000,metro
+Kolkata,West Bengal,22.5726,88.3639,4496694,metro
+Surat,Gujarat,21.1702,72.8311,4467797,tier1
+Pune,Maharashtra,18.5204,73.8567,3124458,tier1
+Jaipur,Rajasthan,26.9124,75.7873,3046163,tier1
+Lucknow,Uttar Pradesh,26.8467,80.9462,2817105,tier1
+Kanpur,Uttar Pradesh,26.4499,80.3319,2765348,tier1
+Nagpur,Maharashtra,21.1458,79.0882,2405421,tier1
+Indore,Madhya Pradesh,22.7196,75.8577,1994397,tier1
+Thane,Maharashtra,19.2183,72.9781,1841488,tier1
+Bhopal,Madhya Pradesh,23.2599,77.4126,1795648,tier1
+Visakhapatnam,Andhra Pradesh,17.6868,83.2185,1728128,tier1
+Patna,Bihar,25.5941,85.1376,1684222,tier1
+Vadodara,Gujarat,22.3072,73.1812,1666703,tier1
+Ghaziabad,Uttar Pradesh,28.6692,77.4538,1636068,tier1
+Ludhiana,Punjab,30.901,75.8573,1618879,tier1
+Agra,Uttar Pradesh,27.1767,78.0081,1585704,tier1
+Nashik,Maharashtra,19.9975,73.7898,1486973,tier1
+Faridabad,Haryana,28.4089,77.3178,1404653,tier1
+Meerut,Uttar Pradesh,28.9845,77.7064,1305429,tier2
+Rajkot,Gujarat,22.3039,70.8022,1286678,tier2
+Varanasi,Uttar Pradesh,25.3176,82.9739,1201815,tier2
+Srinagar,Jammu & Kashmir,34.0837,74.7973,1180570,tier2
+Aurangabad,Maharashtra,19.8762,75.3433,1171330,tier2
+Dhanbad,Jharkhand,23.7957,86.4304,1161561,tier2
+Amritsar,Punjab,31.634,74.8723,1132761,tier2
+Navi Mumbai,Maharashtra,19.033,73.0297,1119477,tier2
+Allahabad,Uttar Pradesh,25.4358,81.8463,1112544,tier2
+Ranchi,Jharkhand,23.3441,85.3096,1073440,tier2
+Howrah,West Bengal,22.5958,88.2636,1072161,tier2
+Coimbatore,Tamil Nadu,11.0168,76.9558,1061447,tier2
+Jabalpur,Madhya Pradesh,23.1815,79.9864,1055525,tier2
+Gwalior,Madhya Pradesh,26.2183,78.1828,1053505,tier2
+Vijayawada,Andhra Pradesh,16.5062,80.648,1048240,tier2
+Jodhpur,Rajasthan,26.2389,73.0243,1033918,tier2
+Madurai,Tamil Nadu,9.9252,78.1198,1016885,tier2
+Raipur,Chhattisgarh,21.2514,81.6296,1010087,tier2
+Kota,Rajasthan,25.2138,75.8648,1001694,tier2
+Chandigarh,Chandigarh,30.7333,76.7794,960787,tier2
+Guwahati,Assam,26.1445,91.7362,957352,tier2
+Solapur,Maharashtra,17.6599,75.9064,951118,tier2
+Hubli,Karnataka,15.3647,75.124,943857,tier2
+Mysuru,Karnataka,12.2958,76.6394,920550,tier2
+Tiruchirappalli,Tamil Nadu,10.7905,78.7047,916857,tier2
+Bareilly,Uttar Pradesh,28.367,79.4304,898167,tier2
+Aligarh,Uttar Pradesh,27.8974,78.088,872575,tier2
+Tiruppur,Tamil Nadu,11.1085,77.3411,877778,tier2
+Moradabad,Uttar Pradesh,28.8386,78.7733,889810,tier2
+Jalandhar,Punjab,31.326,75.5762,862196,tier2
+Bhubaneswar,Odisha,20.2961,85.8245,837737,tier2
+Salem,Tamil Nadu,11.6643,78.146,831038,tier2
+Warangal,Telangana,17.9784,79.5941,798571,tier2
+Mira-Bhayandar,Maharashtra,19.2952,72.8544,814655,tier2
+Guntur,Andhra Pradesh,16.3067,80.4365,743354,tier2
+Bhiwandi,Maharashtra,19.2813,73.0636,711329,tier2
+Saharanpur,Uttar Pradesh,29.964,77.546,703345,tier2
+Gorakhpur,Uttar Pradesh,26.7606,83.3732,673446,tier2
+Bikaner,Rajasthan,28.0229,73.3119,644406,tier2
+Amravati,Maharashtra,20.932,77.7523,646801,tier2
+Noida,Uttar Pradesh,28.5355,77.391,637272,tier2
+Jamshedpur,Jharkhand,22.8046,86.2029,629659,tier2
+Bhilai,Chhattisgarh,21.1938,81.3509,625697,tier2
+Cuttack,Odisha,20.4625,85.8828,606007,tier2
+Firozabad,Uttar Pradesh,27.1592,78.3957,603797,tier2
+Kochi,Kerala,9.9312,76.2673,601574,tier2
+Nellore,Andhra Pradesh,14.4426,79.9865,598046,tier2
+Bhavnagar,Gujarat,21.7645,72.1519,593350,tier2
+Dehradun,Uttarakhand,30.3165,78.0322,578420,tier2
+Durgapur,West Bengal,23.5204,87.3119,566517,tier2
+Asansol,West Bengal,23.6739,86.9524,563917,tier2
+Nanded,Maharashtra,19.1383,77.321,550564,tier2
+Kolhapur,Maharashtra,16.705,74.2433,549236,tier2
+Ajmer,Rajasthan,26.4499,74.6399,542580,tier2
+Gulbarga,Karnataka,17.3297,76.8343,532031,tier2
+Jamnagar,Gujarat,22.4707,70.0577,529308,tier2
+Ujjain,Madhya Pradesh,23.1765,75.7885,515215,tier2
+Loni,Uttar Pradesh,28.7333,77.2833,516082,tier2
+Siliguri,West Bengal,26.7271,88.3953,513264,tier2
+Jhansi,Uttar Pradesh,25.4484,78.5685,507293,tier2
+Ulhasnagar,Maharashtra,19.2167,73.1667,506098,tier2
+Jammu,Jammu & Kashmir,32.7266,74.857,502197,tier2
+Sangli,Maharashtra,16.8524,74.5815,502098,tier2
+Mangalore,Karnataka,12.9141,74.856,484785,tier2
+Erode,Tamil Nadu,11.341,77.7172,474949,tier2
+Belgaum,Karnataka,15.8497,74.4977,488292,tier2
+Ambattur,Tamil Nadu,13.1143,80.1548,466265,tier2
+Tirunelveli,Tamil Nadu,8.7139,77.7567,460169,tier2
+Malegaon,Maharashtra,20.5579,74.5089,471646,tier2
+Gaya,Bihar,24.7955,84.9994,467231,tier2
+Jalgaon,Maharashtra,21.0077,75.5626,460468,tier2
+Udaipur,Rajasthan,24.5854,73.7125,451100,tier2
+Davanagere,Karnataka,14.4644,75.9218,435128,tier2
+Kozhikode,Kerala,11.2588,75.7804,432082,tier2
+Akola,Maharashtra,20.7096,77.0021,427430,tier2
+Kurnool,Andhra Pradesh,15.8281,78.0373,421612,tier2
+Rajpur Sonarpur,West Bengal,22.45,88.4,403551,tier2
+Rajahmundry,Andhra Pradesh,16.9891,81.78,341831,tier2
+Bokaro,Jharkhand,23.6693,86.1511,333683,tier2
+South Dumdum,West Bengal,22.62,88.39,392399,tier2
+Bellary,Karnataka,15.1394,76.9214,317000,tier3
+Patiala,Punjab,30.3398,76.3869,406192,tier3
+Gopalpur,Odisha,19.2667,84.9167,79000,tier3
+Agartala,Tripura,23.8315,91.2868,189327,tier3
+Bhagalpur,Bihar,25.2425,86.9842,340767,tier3
+Muzaffarnagar,Uttar Pradesh,29.4727,77.7085,392768,tier3
+Bhatpara,West Bengal,22.8667,88.4,441956,tier3
+Panihati,West Bengal,22.69,88.37,374998,tier3
+Latur,Maharashtra,18.4088,76.5604,382754,tier3
+Dhule,Maharashtra,20.9042,74.7749,373174,tier3
+Rohtak,Haryana,28.8955,76.6066,374292,tier3
+Korba,Chhattisgarh,22.3595,82.7501,358842,tier3
+Bhilwara,Rajasthan,25.35,74.6333,340839,tier3
+Brahmapur,Odisha,19.315,84.7941,355823,tier3
+Muzaffarpur,Bihar,26.1209,85.3647,354451,tier3
+Ahmednagar,Maharashtra,19.0948,74.748,350905,tier3
+Mathura,Uttar Pradesh,27.4924,77.6737,349053,tier3
+Kollam,Kerala,8.8932,76.6141,349033,tier3
+Avadi,Tamil Nadu,13.1147,80.1089,345996,tier3
+Kadapa,Andhra Pradesh,14.4673,78.8242,344078,tier3
+Kamarhati,West Bengal,22.67,88.37,330213,tier3
+Sambalpur,Odisha,21.4669,83.9756,335761,tier3
+Bilaspur,Chhattisgarh,22.0796,82.1391,331029,tier3
+Shahjahanpur,Uttar Pradesh,27.88,79.91,340510,tier3
+Satara,Maharashtra,17.6805,74.0183,300500,tier3
+Bijapur,Karnataka,16.8302,75.71,326000,tier3
+Shambhajinagar,Maharashtra,19.8762,75.3433,1171330,tier2
+Thrissur,Kerala,10.5276,76.2144,315957,tier3
+Imphal,Manipur,24.817,93.9368,264986,tier3
+Nanded-Waghala,Maharashtra,19.1605,77.298,550564,tier3
+Ichalkaranji,Maharashtra,16.6933,74.4614,274209,tier3
+Tirupati,Andhra Pradesh,13.6288,79.4192,374260,tier3
+Karnal,Haryana,29.6857,76.9905,286243,tier3
+Shimoga,Karnataka,13.9299,75.5681,274105,tier3
+Tumkur,Karnataka,13.3379,77.1023,305821,tier3
+Panvel,Maharashtra,18.9894,73.1175,270000,tier3
+Nizamabad,Telangana,18.6725,78.0941,311152,tier3
+Parbhani,Maharashtra,19.2604,76.7748,307060,tier3
+Hisar,Haryana,29.1492,75.7217,301249,tier3
+Bathinda,Punjab,30.211,74.9455,285813,tier3
+Puducherry,Puducherry,11.9416,79.8083,244377,tier3
+Shimla,Himachal Pradesh,31.1048,77.1734,171817,tier3
+Gangtok,Sikkim,27.3314,88.6138,100286,tier3
+Aizawl,Mizoram,23.7271,92.7176,293416,tier3
+Itanagar,Arunachal Pradesh,27.0844,93.6053,44971,tier3
+Kohima,Nagaland,25.6751,94.1086,99039,tier3
+Panaji,Goa,15.4909,73.8278,114405,tier3
+Shillong,Meghalaya,25.5788,91.8933,143229,tier3
+Dispur,Assam,26.1433,91.7898,972768,tier2
+Port Blair,Andaman & Nicobar,11.6234,92.7265,99984,tier3
+Kavaratti,Lakshadweep,10.5669,72.642,11210,tier3
+Silvassa,Dadra & Nagar Haveli,20.2766,73.0169,57218,tier3
+Daman,Daman & Diu,20.3974,72.8328,44979,tier3

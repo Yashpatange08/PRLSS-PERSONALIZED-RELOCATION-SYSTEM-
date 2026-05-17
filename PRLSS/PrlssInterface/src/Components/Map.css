@@ -2,7 +2,8 @@
   display: flex;
   width: 100vw;
   height: 100vh;
-  padding-top: 64px; /* below navbar */
+  padding-top: 120px; /* clear the floating navbar */
+  box-sizing: border-box;
   background: #0f0f1a;
 }
 

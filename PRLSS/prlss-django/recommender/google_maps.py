@@ -1,3 +1,9 @@
+"""
+Google Maps Service
+====================
+Works with ANY Indian city — looks up city center from the City DB table
+instead of hardcoded CITY_CONFIG.
+"""
 import json
 import logging
 import urllib.parse
@@ -24,14 +30,40 @@ def _get_json(url, params):
         return {}
 
 
-def geocode_area(area_name, city="nashik"):
+def _get_city_from_db(city_slug):
+    """
+    Look up city center coords from the City DB table.
+    Returns (lat, lon, city_name) or None if not found.
+    Works for ALL Indian cities, not just Nashik/Mumbai/Pune.
+    """
+    try:
+        from .models import City
+        city_obj = City.objects.filter(
+            slug=city_slug, is_active=True
+        ).first()
+        if city_obj:
+            return city_obj.latitude, city_obj.longitude, city_obj.name
+        # Try by name if slug not found
+        city_obj = City.objects.filter(
+            name__iexact=city_slug, is_active=True
+        ).first()
+        if city_obj:
+            return city_obj.latitude, city_obj.longitude, city_obj.name
+    except Exception as e:
+        logger.warning("City DB lookup failed: %s", e)
+    return None
+
+
+def geocode_area(area_name, city_slug="nashik"):
     api_key = getattr(settings, "GOOGLE_MAPS_API_KEY", "")
     if not api_key:
-        return _city_center_fallback(area_name, city)
+        return _city_center_fallback(area_name, city_slug)
 
-    city_cfg   = settings.CITY_CONFIG.get(city, {})
-    city_name  = city_cfg.get("name", city.title())
-    full_query = f"{area_name}, {city_name}, Maharashtra, India"
+    # Get city name from DB
+    city_db = _get_city_from_db(city_slug)
+    city_name = city_db[2] if city_db else city_slug.replace("-", " ").title()
+
+    full_query = f"{area_name}, {city_name}, India"
     cache_key  = f"geocode:{full_query.lower().replace(' ', '_')}"
 
     cached = cache.get(cache_key)
@@ -44,10 +76,13 @@ def geocode_area(area_name, city="nashik"):
         "region":   "IN",
         "language": "en",
     }
-    bounds = settings.CITY_BOUNDS.get(city, {})
-    if bounds:
-        sw, ne = bounds["sw"], bounds["ne"]
-        params["bounds"] = f"{sw['lat']},{sw['lng']}|{ne['lat']},{ne['lng']}"
+
+    # Add bounding box from DB city coords
+    if city_db:
+        lat, lon, _ = city_db
+        # ~40km bounding box around city center
+        delta = 0.4
+        params["bounds"] = f"{lat-delta},{lon-delta}|{lat+delta},{lon+delta}"
 
     data   = _get_json(GEOCODING_URL, params)
     status = data.get("status", "")
@@ -60,7 +95,7 @@ def geocode_area(area_name, city="nashik"):
             "formatted_address": r.get("formatted_address", full_query),
             "lat":               float(loc["lat"]),
             "lon":               float(loc["lng"]),
-            "city":              city,
+            "city":              city_slug,
             "place_id":          r.get("place_id", ""),
         }
         try:
@@ -70,35 +105,42 @@ def geocode_area(area_name, city="nashik"):
         return res
 
     logger.warning("Geocode failed for '%s' — status: %s", full_query, status)
-    return _city_center_fallback(area_name, city)
+    return _city_center_fallback(area_name, city_slug)
 
 
-def _city_center_fallback(area_name, city):
-    cfg = settings.CITY_CONFIG.get(city, settings.CITY_CONFIG["nashik"])
+def _city_center_fallback(area_name, city_slug):
+    """Uses DB city center coords. Works for all 157 cities."""
+    city_db = _get_city_from_db(city_slug)
+    if city_db:
+        lat, lon, city_name = city_db
+    else:
+        # Ultimate fallback: India center
+        lat, lon, city_name = 20.5937, 78.9629, city_slug.title()
+
+    logger.info("City center fallback for '%s' in %s", area_name, city_name)
     return {
         "area_name":         area_name,
-        "formatted_address": f"{area_name}, {cfg['name']} (approximate)",
-        "lat":               cfg["center_lat"],
-        "lon":               cfg["center_lon"],
-        "city":              city,
+        "formatted_address": f"{area_name}, {city_name} (approximate)",
+        "lat":               lat,
+        "lon":               lon,
+        "city":              city_slug,
         "place_id":          "",
         "is_fallback":       True,
     }
 
 
-def get_autocomplete_suggestions(query, city="nashik"):
+def get_autocomplete_suggestions(query, city_slug="nashik"):
     api_key = getattr(settings, "GOOGLE_MAPS_API_KEY", "")
     if not api_key or len(query.strip()) < 2:
         return []
 
-    cache_key = f"ac:{city}:{query.lower().strip().replace(' ','_')}"
+    cache_key = f"ac:{city_slug}:{query.lower().strip().replace(' ','_')}"
     cached    = cache.get(cache_key)
     if cached:
         return cached
 
-    city_cfg  = settings.CITY_CONFIG.get(city, {})
-    city_name = city_cfg.get("name", city.title())
-    bounds    = settings.CITY_BOUNDS.get(city, {})
+    city_db   = _get_city_from_db(city_slug)
+    city_name = city_db[2] if city_db else city_slug.title()
 
     params = {
         "input":      f"{query}, {city_name}",
@@ -107,11 +149,12 @@ def get_autocomplete_suggestions(query, city="nashik"):
         "language":   "en",
         "components": "country:in",
     }
-    if bounds:
-        sw  = bounds["sw"]
-        ne  = bounds["ne"]
-        params["location"] = f"{(sw['lat']+ne['lat'])/2},{(sw['lng']+ne['lng'])/2}"
-        params["radius"]   = "20000"
+
+    # Add location bias from DB city coords
+    if city_db:
+        lat, lon, _ = city_db
+        params["location"] = f"{lat},{lon}"
+        params["radius"]   = "30000"
 
     data    = _get_json(PLACES_AC_URL, params)
     results = []
