@@ -32,7 +32,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        # Resolve file path
+        
         if options["file"]:
             csv_path = Path(options["file"])
         else:
@@ -67,7 +67,7 @@ class Command(BaseCommand):
                         skipped += 1
                         continue
 
-                    # Validate coordinates are within India bounds
+                    # Validate coordinates India bounds
                     if not (6.5 <= lat <= 37.5) or not (68.0 <= lon <= 97.5):
                         self.stdout.write(
                             self.style.WARNING(
@@ -81,7 +81,7 @@ class Command(BaseCommand):
                     base_slug = slugify(city_name)
                     slug      = base_slug
                     counter   = 1
-                    # Handle duplicate slugs (e.g. two cities with same slug)
+                    
                     while City.objects.filter(slug=slug).exclude(name=city_name).exists():
                         slug = f"{base_slug}-{state[:3].lower()}"
                         counter += 1

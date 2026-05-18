@@ -63,7 +63,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "apartment_finder.wsgi.application"
 
-# ── Database ──────────────────────────────────────────────────────────────────
+#  Database 
 _DB_URL = os.environ.get("DATABASE_URL", "")
 if _DB_URL.startswith("postgres"):
     import dj_database_url
@@ -76,7 +76,7 @@ else:
         }
     }
 
-# ── Cache ─────────────────────────────────────────────────────────────
+#  Cache 
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
@@ -84,7 +84,7 @@ CACHES = {
     }
 }
 
-# ── REST Framework ────────────────────────────────────────────────────────────
+# REST Framework 
 REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.AnonRateThrottle",
@@ -101,7 +101,7 @@ REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "recommender.utils.custom_exception_handler",
 }
 
-# ── CORS — allow React dev server (localhost:5173) ────────────────────────────
+# CORS — allow React dev server (localhost:5173) 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",   # Vite dev server
     "http://127.0.0.1:5173",
@@ -112,7 +112,7 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 CORS_ALLOW_CREDENTIALS = True
 
-# ── Static / Media ────────────────────────────────────────────────────────────
+# Static / Media
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 _STATIC_DIR = BASE_DIR / "static"
@@ -121,7 +121,7 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# ── Auth ──────────────────────────────────────────────────────────────────────
+#Auth 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -129,14 +129,14 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# ── Internationalisation ──────────────────────────────────────────────────────
+#  Internationalisation
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True
 USE_TZ = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ── Google Maps ───────────────────────────────────────────────────────────────
+#Google Maps
 GOOGLE_MAPS_API_KEY  = os.environ.get("GOOGLE_MAPS_API_KEY", "AIzaSyC9YS3Kn3RwLkg6BzKyFFABRNmE4uVT3W0")
 GOOGLE_PLACES_API_KEY = GOOGLE_MAPS_API_KEY
 GEOCODING_REGION     = "IN"
@@ -148,12 +148,12 @@ CITY_BOUNDS = {
     "mumbai": {"sw": {"lat": 18.85, "lng": 72.75}, "ne": {"lat": 19.30, "lng": 73.00}},
 }
 
-# ── ML Paths ──────────────────────────────────────────────────────────────────
+# ML Paths
 ML_MODEL_PATH       = BASE_DIR / "data" / "apartment_model.pkl"
 TIMELINE_CSV_PATH   = BASE_DIR / "data" / "extracted_timeline.csv"
 APARTMENTS_CSV_PATH = BASE_DIR / "data" / "ml_apartments.csv"
 
-# ── City config — cities are now stored in the City DB table ─────────────────
+#  City config — cities are now stored in the City DB table
 # Loaded via: python manage.py import_cities
 # No longer hardcoded. Supports all 157+ Indian cities.
 # DEFAULT_CITY is used as fallback for geocoding when no city is selected.
@@ -164,7 +164,7 @@ MAX_RECOMMENDATIONS = 5
 # Default max rent used when city not found in DB
 DEFAULT_MAX_RENT = 50000
 
-# ── Logging ───────────────────────────────────────────────────────────────────
+# Logging
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

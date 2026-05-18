@@ -23,7 +23,7 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 
-# ── Haversine distance ────────────────────────────────────────────────────────
+#Haversine distance
 def haversine_km(lat1, lon1, lat2, lon2):
     R = 6371.0
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
@@ -33,12 +33,12 @@ def haversine_km(lat1, lon1, lat2, lon2):
     return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
-# ── Proximity score (exponential decay) ───────────────────────────────────────
+#Proximity score
 def proximity_score(distance_km, max_km=5.0):
     return math.exp(-distance_km / (max_km / 3))
 
 
-# ── Load model once, cache in memory ─────────────────────────────────────────
+#Load model 
 @lru_cache(maxsize=1)
 def load_model():
     path = settings.ML_MODEL_PATH
@@ -53,7 +53,7 @@ def load_model():
     return None
 
 
-# ── Feature builder ───────────────────────────────────────────────────────────
+
 def build_features(row, rent_budget):
     """Named DataFrame — avoids sklearn feature-name warnings."""
     rent_norm = float(row["rent"]) / max(rent_budget, 1)
@@ -65,7 +65,7 @@ def build_features(row, rent_budget):
     }])
 
 
-# ── Main recommendation function ──────────────────────────────────────────────
+
 def get_recommendations(college_lat, college_lon, rent_budget,
                         city="nashik", top_n=5):
     """
@@ -80,7 +80,7 @@ def get_recommendations(college_lat, college_lon, rent_budget,
     model      = load_model()
     max_radius = getattr(settings, "SEARCH_RADIUS_KM", 5.0)
 
-    # Query apartments — city-agnostic (no hardcoded city list)
+    # Query apartments 
     qs = Apartment.objects.filter(
         city=city,
         is_active=True,
@@ -100,20 +100,20 @@ def get_recommendations(college_lat, college_lon, rent_budget,
 
     df = pd.DataFrame.from_records(qs)
 
-    # Actual distance from user's work location
+    # Actual distance from user
     df["actual_dist_km"] = df.apply(
         lambda r: haversine_km(college_lat, college_lon, r["lat"], r["lon"]),
         axis=1,
     )
 
-    # Filter by radius — relax if nothing found
+    # Filter by radius 
     within = df[df["actual_dist_km"] <= max_radius].copy()
     if within.empty:
         within = df[df["actual_dist_km"] <= 15.0].copy()
     if within.empty:
         within = df.copy()
 
-    # Score each apartment
+    
     scores = []
     for _, row in within.iterrows():
         # ML score
@@ -124,7 +124,7 @@ def get_recommendations(college_lat, college_lon, rent_budget,
             except Exception:
                 ml_score = float(row["value_score"])
         else:
-            # Rule-based fallback (no model file)
+            
             rent_fit  = 1.0 - (float(row["rent"]) / max(rent_budget, 1))
             ml_score  = (float(row["value_score"]) * 0.6 + max(0, rent_fit) * 0.4)
             ml_score  = max(0.0, min(1.0, ml_score))

@@ -77,10 +77,10 @@ def geocode_area(area_name, city_slug="nashik"):
         "language": "en",
     }
 
-    # Add bounding box from DB city coords
+    #Add bounding box from DB city coords
     if city_db:
         lat, lon, _ = city_db
-        # ~40km bounding box around city center
+        #40km bounding box around city center
         delta = 0.4
         params["bounds"] = f"{lat-delta},{lon-delta}|{lat+delta},{lon+delta}"
 
@@ -114,7 +114,7 @@ def _city_center_fallback(area_name, city_slug):
     if city_db:
         lat, lon, city_name = city_db
     else:
-        # Ultimate fallback: India center
+        # Ultimate fallback
         lat, lon, city_name = 20.5937, 78.9629, city_slug.title()
 
     logger.info("City center fallback for '%s' in %s", area_name, city_name)
@@ -150,7 +150,7 @@ def get_autocomplete_suggestions(query, city_slug="nashik"):
         "components": "country:in",
     }
 
-    # Add location bias from DB city coords
+    
     if city_db:
         lat, lon, _ = city_db
         params["location"] = f"{lat},{lon}"

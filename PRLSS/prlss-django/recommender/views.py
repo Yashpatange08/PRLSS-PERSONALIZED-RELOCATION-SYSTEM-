@@ -187,7 +187,7 @@ class RecommendView(APIView):
         return Response(payload)
 
 
-# ── GET /api/geocode/ ─────────────────────────────────────────────────────────
+# GET /api/geocode/ 
 @api_view(["GET"])
 def geocode_view(request):
     serializer = GeocodeRequestSerializer(data=request.query_params)
@@ -202,7 +202,7 @@ def geocode_view(request):
     return Response({"error": False, "data": result})
 
 
-# ── GET /api/autocomplete/ ────────────────────────────────────────────────────
+#  GET /api/autocomplete/
 @api_view(["GET"])
 def autocomplete_view(request):
     query = request.query_params.get("q", "").strip()
@@ -212,7 +212,7 @@ def autocomplete_view(request):
     return Response({"error": False, "data": get_autocomplete_suggestions(query, city)})
 
 
-# ── GET /api/apartments/ ──────────────────────────────────────────────────────
+# GET /api/apartments/
 class ApartmentListView(generics.ListAPIView):
     serializer_class = ApartmentSerializer
 
@@ -227,7 +227,7 @@ class ApartmentListView(generics.ListAPIView):
         return qs.order_by("rent")
 
 
-# ── GET /api/timeline/ ────────────────────────────────────────────────────────
+# GET /api/timeline/
 class TimelineListView(generics.ListAPIView):
     serializer_class = TimelineVisitSerializer
 
@@ -239,7 +239,7 @@ class TimelineListView(generics.ListAPIView):
         return qs.order_by("-visit_freq")[:200]
 
 
-# ── POST /api/feedback/ ───────────────────────────────────────────────────────
+# POST /api/feedback/ 
 class FeedbackCreateView(generics.CreateAPIView):
     serializer_class = FeedbackSerializer
     queryset         = RecommendationFeedback.objects.all()
@@ -255,7 +255,7 @@ class FeedbackCreateView(generics.CreateAPIView):
         )
 
 
-# ── GET /api/stats/ ───────────────────────────────────────────────────────────
+# GET /api/stats/
 @api_view(["GET"])
 def stats_view(request):
     cached = cache.get("prlss:stats")
@@ -276,7 +276,7 @@ def stats_view(request):
     return Response(data)
 
 
-# ── Error Handlers ────────────────────────────────────────────────────────────
+#Error Handlers 
 def error_400(request, exception=None):
     return HttpResponse('{"error":true,"message":"Bad Request"}',
                         content_type="application/json", status=400)

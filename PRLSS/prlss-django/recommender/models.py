@@ -3,7 +3,7 @@ from django.utils.text import slugify
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
-# ── NEW: City model replaces hardcoded CITY_CONFIG ───────────────────────────
+
 class City(models.Model):
     """All Indian cities — loaded from india_cities.csv via import_cities command."""
     name       = models.CharField(max_length=100, db_index=True)
@@ -35,7 +35,7 @@ class City(models.Model):
         super().save(*args, **kwargs)
 
 
-# ── Existing models UNCHANGED ─────────────────────────────────────────────────
+
 
 class Apartment(models.Model):
     name          = models.CharField(max_length=200, db_index=True)

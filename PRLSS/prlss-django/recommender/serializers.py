@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Apartment, City, TimelineVisit, UserPreference, RecommendationFeedback
 
 
-# ── NEW: City serializer ──────────────────────────────────────────────────────
+# City serializer
 class CitySerializer(serializers.ModelSerializer):
     class Meta:
         model  = City
@@ -10,7 +10,7 @@ class CitySerializer(serializers.ModelSerializer):
                   "latitude", "longitude", "population", "tier"]
 
 
-# ── Existing serializers UNCHANGED ────────────────────────────────────────────
+#Existing serializers
 
 class ApartmentSerializer(serializers.ModelSerializer):
     match_percent = serializers.SerializerMethodField()
@@ -45,10 +45,10 @@ class RecommendRequestSerializer(serializers.Serializer):
     college_lat = serializers.FloatField(required=False, allow_null=True, default=None)
     college_lon = serializers.FloatField(required=False, allow_null=True, default=None)
     rent_budget = serializers.IntegerField(min_value=1000, max_value=500000)
-    # city is now a free string slug (any Indian city)
+    
     city        = serializers.CharField(max_length=120, default="nashik")
 
-    # Removed strict validation to allow fallback to city center
+    
 
 
 class GeocodeRequestSerializer(serializers.Serializer):
