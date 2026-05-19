@@ -73,41 +73,53 @@
 .components-container {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  gap: 12vw;
-  /* Increased distance between Map and Form */
-  padding: 40px 40px 100px 40px;
+  align-items: center;
+  gap: 6vw;
+  padding: 40px 40px 120px 40px;
   margin-top: -20px;
-  /* Slight overlap with the padding of hero-content, but not the text */
   width: 100%;
-  max-width: 1400px;
+  max-width: 1300px;
   margin-inline: auto;
 }
 
 /* Left: Map Preview */
 .home-map-container {
-  width: 450px;
-  /* Fixed width to match screenshot size */
-  height: 350px;
-  /* Fixed height to match screenshot size */
-  border-radius: 4px;
+  flex: 1;
+  width: 100%;
+  max-width: 750px;
+  height: 500px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
   background-color: #1a1a2e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.home-map-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
 }
 
 /* Right: Upload Form */
 .upload-form-container {
-  width: 380px;
-  /* Fixed width to match screenshot size */
-  background: transparent;
-  /* Transparent background */
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-  padding: 35px 30px;
+  width: 400px;
+  flex-shrink: 0;
+  background: rgba(20, 20, 35, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 40px 35px;
   color: white;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease;
+}
+
+.upload-form-container:hover {
+  transform: translateY(-5px);
 }
 
 .upload-title {
@@ -125,14 +137,21 @@
 
 .upload-input,
 .upload-file-input {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 2px;
-  padding: 12px 15px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 14px 16px;
   color: white;
   font-family: inherit;
   outline: none;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.upload-input:focus,
+.upload-file-input:focus {
+  border-color: #3b82f6;
+  background: rgba(0, 0, 0, 0.4);
 }
 
 .upload-input::placeholder {
@@ -158,24 +177,36 @@
   background-color: #3b82f6;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 2px;
+  padding: 14px 20px;
+  border-radius: 8px;
   cursor: pointer;
   font-family: inherit;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  width: 100%;
+}
+
+.btn-submit:hover {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+}
+
+.btn-submit:active {
+  transform: translateY(0);
 }
 
 .btn-cancel {
   background-color: #8c959f;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 2px;
+  padding: 14px 20px;
+  border-radius: 8px;
   cursor: pointer;
   font-family: inherit;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
 }
 
 @media (max-width: 900px) {
